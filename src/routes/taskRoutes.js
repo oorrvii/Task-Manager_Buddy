@@ -1,5 +1,3 @@
-
-
 import express from "express";
 import {
   getTasks,
@@ -28,6 +26,6 @@ router.post("/", createTask);
 router.put("/:id", updateTask);
 
 // DELETE /api/tasks/:id → delete a task
-router.delete("/:id", deleteTask);
+router.delete("/:id", authMiddleware, deleteTask);
 
 export default router;

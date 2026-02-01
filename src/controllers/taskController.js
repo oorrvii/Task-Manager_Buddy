@@ -53,27 +53,21 @@ export const updateTask = async (req, res) => {
 // 4️⃣ Delete a task
 export const deleteTask = async (req, res) => {
   try {
-    console.log("DELETE hit");
-    console.log("Task ID:", req.params.id);
-    console.log("User ID:", req.userId);
+    const taskId = req.params.id;
+    const userId = req.user.userId;   // ✅ CORRECT
 
-    const task = await Task.findById(req.params.id);
-    console.log("Task found:", task);
+    const deletedTask = await Task.findOneAndDelete({
+      _id: taskId,
+      user: userId
+    });
 
-    if (!task) {
+    if (!deletedTask) {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    if (task.user.toString() !== req.userId) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-
-    await task.deleteOne();
     res.json({ message: "Task deleted successfully" });
-
-  } catch (error) {
-    console.error("DELETE ERROR FULL:", error);
-    res.status(500).json({ message: "Delete failed", error: error.message });
+  } catch (err) {
+    console.error("DELETE TASK ERROR:", err); // 🔥 IMPORTANT
+    res.status(500).json({ message: "Failed to delete task" });
   }
 };
-
