@@ -17,7 +17,7 @@ export const createTask = async (req, res) => {
 
   try {
     const newTask = await Task.create({
-      user: req.user.userid,
+      user: req.user.id,
       title,
       description,
     });
@@ -53,21 +53,14 @@ export const updateTask = async (req, res) => {
 // 4️⃣ Delete a task
 export const deleteTask = async (req, res) => {
   try {
-    const taskId = req.params.id;
-    const userId = req.user.userId;   // ✅ CORRECT
+    const task = await Task.findOne({ _id: req.params.id, user: req.user.id });
 
-    const deletedTask = await Task.findOneAndDelete({
-      _id: taskId,
-      user: userId
-    });
+    if (!task) return res.status(404).json({ message: "Task not found" });
 
-    if (!deletedTask) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-
-    res.json({ message: "Task deleted successfully" });
-  } catch (err) {
-    console.error("DELETE TASK ERROR:", err); // 🔥 IMPORTANT
-    res.status(500).json({ message: "Failed to delete task" });
+    await task.remove();
+    res.json({ message: "Task removed" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 };
